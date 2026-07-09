@@ -1,0 +1,1772 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bug and Feature Tracker Mock</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-2: #f1f4f7;
+      --line: #d9dee7;
+      --line-strong: #c3cad6;
+      --text: #152033;
+      --muted: #687386;
+      --quiet: #8893a5;
+      --critical: #b42318;
+      --critical-bg: #fff0ed;
+      --high: #bf6a02;
+      --high-bg: #fff4df;
+      --medium: #2264b0;
+      --medium-bg: #eaf3ff;
+      --low: #4d6b35;
+      --low-bg: #edf6e7;
+      --bug: #b42318;
+      --feature: #375dfb;
+      --pending: #6b7280;
+      --progress: #0b6bcb;
+      --resolved: #227950;
+      --focus: #2f6fed;
+      --shadow: 0 16px 40px rgba(25, 34, 51, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 16px 24px 12px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #0f172a;
+      background: #f8fafc;
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 34px;
+      border-radius: 7px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      border-color: #9aa6b6;
+      background: #f8fafc;
+    }
+
+    .btn.primary {
+      border-color: #1e5dcc;
+      background: #1f6feb;
+      color: white;
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border-radius: 7px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--text);
+      display: inline-grid;
+      place-items: center;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .icon-btn:hover {
+      background: #f8fafc;
+      border-color: #9aa6b6;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .metric {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 9px 10px;
+      display: grid;
+      gap: 2px;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .area-band {
+      background: #eef2f6;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .area-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 10px 24px;
+    }
+
+    .area-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      display: table;
+    }
+
+    .area-table th,
+    .area-table td {
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .area-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .area-table th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #f8fafc;
+    }
+
+    .area-table td:not(:first-child):not(:nth-child(7)),
+    .area-table th:not(:first-child):not(:nth-child(7)) {
+      text-align: right;
+    }
+
+    .area-table td:first-child,
+    .area-table th:first-child,
+    .area-table td:nth-child(7),
+    .area-table th:nth-child(7) {
+      width: 18%;
+    }
+
+    .filters {
+      position: sticky;
+      top: 174px;
+      z-index: 30;
+      background: rgba(247, 248, 250, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .filters-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: grid;
+      grid-template-columns: minmax(220px, 1.2fr) repeat(7, minmax(120px, 0.6fr)) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      min-height: 34px;
+      width: 100%;
+      border-radius: 7px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 10px;
+      outline: none;
+    }
+
+    .field textarea {
+      min-height: 72px;
+      padding: 9px 10px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .btn:focus,
+    .icon-btn:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.18);
+    }
+
+    main {
+      max-width: 1480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 18px 24px 40px;
+    }
+
+    .view-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tab.active {
+      color: var(--text);
+      border-color: var(--line-strong);
+      background: #eef2f6;
+    }
+
+    .group {
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .group-header {
+      position: sticky;
+      top: 252px;
+      z-index: 20;
+      min-height: 42px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .group-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+    }
+
+    .group-title span:first-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .count-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #e6ebf2;
+      color: #405064;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .group-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .rows {
+      display: grid;
+    }
+
+    .issue-row {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: minmax(320px, 1.6fr) minmax(110px, 0.45fr) minmax(130px, 0.5fr) minmax(130px, 0.45fr) minmax(116px, 0.42fr) minmax(128px, 0.45fr) 44px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .issue-row:last-child {
+      border-bottom: 0;
+    }
+
+    .issue-row:hover {
+      background: #fbfcfe;
+    }
+
+    .issue-main {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .issue-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .issue-title strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 750;
+    }
+
+    .issue-subline {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .issue-id {
+      color: var(--quiet);
+      font-weight: 750;
+      flex: 0 0 auto;
+    }
+
+    .small-note {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge,
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      max-width: 100%;
+      border-radius: 999px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.bug {
+      color: var(--bug);
+      background: #fff0ed;
+      border: 1px solid #ffc7bd;
+    }
+
+    .badge.feature {
+      color: var(--feature);
+      background: #eef2ff;
+      border: 1px solid #cad5ff;
+    }
+
+    .pill.critical {
+      color: var(--critical);
+      background: var(--critical-bg);
+      border: 1px solid #ffb3a8;
+    }
+
+    .pill.high {
+      color: var(--high);
+      background: var(--high-bg);
+      border: 1px solid #ffd38a;
+    }
+
+    .pill.medium {
+      color: var(--medium);
+      background: var(--medium-bg);
+      border: 1px solid #b9d8ff;
+    }
+
+    .pill.low {
+      color: var(--low);
+      background: var(--low-bg);
+      border: 1px solid #c7e7b8;
+    }
+
+    .pill.pending {
+      color: var(--pending);
+      background: #f1f3f6;
+      border: 1px solid #d5dae3;
+    }
+
+    .pill.in-progress {
+      color: var(--progress);
+      background: #eaf3ff;
+      border: 1px solid #b9d8ff;
+    }
+
+    .pill.resolved {
+      color: var(--resolved);
+      background: #e8f7ef;
+      border: 1px solid #b8e3ca;
+    }
+
+    .owner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-weight: 700;
+    }
+
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      background: #f8fafc;
+      color: #3b4656;
+      font-size: 11px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .cell-label {
+      color: var(--muted);
+      font-size: 11px;
+      display: none;
+    }
+
+    .evidence {
+      display: grid;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .evidence strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .expand-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .details {
+      display: none;
+      grid-template-columns: minmax(280px, 440px) 1fr;
+      gap: 16px;
+      padding: 14px 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .details.open {
+      display: grid;
+    }
+
+    .screenshot-frame {
+      min-height: 230px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #ffffff;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 32px 1fr;
+    }
+
+    .fake-browser-bar {
+      border-bottom: 1px solid var(--line);
+      background: #f1f4f7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #b8c0cc;
+    }
+
+    .fake-screen {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr 0.75fr;
+      gap: 16px;
+      background:
+        linear-gradient(#fff, #fff),
+        repeating-linear-gradient(90deg, #f4f6f9 0 1px, transparent 1px 38px);
+      background-blend-mode: normal;
+    }
+
+    .screen-panel {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .screen-line {
+      height: 9px;
+      border-radius: 99px;
+      background: #d9dee7;
+    }
+
+    .screen-line.short {
+      width: 56%;
+    }
+
+    .screen-line.warn {
+      background: #f7b7ad;
+      width: 76%;
+    }
+
+    .screen-button {
+      height: 28px;
+      border-radius: 6px;
+      background: #1f6feb;
+      width: 86px;
+      margin-top: 4px;
+    }
+
+    .log-panel {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .log-title {
+      font-weight: 800;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .log-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .log-item strong {
+      color: var(--text);
+      font-weight: 750;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(15, 23, 42, 0.26);
+      display: none;
+    }
+
+    .drawer-backdrop.open {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 100;
+      width: min(480px, 100vw);
+      height: 100vh;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border-left: 1px solid var(--line);
+      transform: translateX(100%);
+      transition: transform 160ms ease;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header,
+    .drawer-footer {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .drawer-footer {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      justify-content: flex-end;
+    }
+
+    .drawer-header h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .drawer-body {
+      padding: 16px;
+      overflow: auto;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 3px;
+      background: #f1f4f7;
+    }
+
+    .segment {
+      min-height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      font-weight: 750;
+      color: var(--muted);
+    }
+
+    .segment.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .char-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .paste-zone {
+      min-height: 118px;
+      border: 1px dashed #9aa6b6;
+      border-radius: 8px;
+      background: #f8fafc;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      color: var(--muted);
+      text-align: center;
+      outline: none;
+    }
+
+    .paste-zone:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.18);
+    }
+
+    .paste-preview {
+      display: none;
+      width: 100%;
+      max-height: 170px;
+      object-fit: contain;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .paste-preview.visible {
+      display: block;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1180px) {
+      .filters-inner {
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+      }
+
+      .issue-row {
+        grid-template-columns: minmax(300px, 1.5fr) repeat(4, minmax(110px, 0.55fr)) 44px;
+      }
+
+      .issue-row .evidence {
+        display: none;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .topbar-inner,
+      .area-inner,
+      .filters-inner,
+      main {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .title-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filters {
+        position: static;
+      }
+
+      .filters-inner {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .group-header {
+        position: static;
+      }
+
+      .issue-row {
+        grid-template-columns: 1fr 42px;
+        gap: 8px 10px;
+      }
+
+      .issue-main {
+        grid-column: 1 / 2;
+      }
+
+      .issue-row > :not(.issue-main):not(.expand-btn) {
+        grid-column: 1 / -1;
+      }
+
+      .cell {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .cell-label {
+        display: inline;
+      }
+
+      .details {
+        grid-template-columns: 1fr;
+      }
+
+      .area-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .filters-inner,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .icon-btn {
+        width: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="title-row">
+          <div class="brand">
+            <div class="brand-mark">BT</div>
+            <div>
+              <h1>Bug and Feature Tracker</h1>
+              <div class="subtitle">Priority-first list for product, QA, and engineering triage</div>
+            </div>
+          </div>
+          <div class="top-actions">
+            <button class="btn ghost" type="button" id="resolvedViewBtn">Resolved view</button>
+            <button class="btn" type="button" id="exportBtn">Export</button>
+            <button class="btn primary" type="button" id="openDrawerBtn">+ New item</button>
+          </div>
+        </div>
+
+        <section class="summary-grid" aria-label="Open item summary">
+          <div class="metric">
+            <div class="metric-value" id="metricOpen">0</div>
+            <div class="metric-label">Open items</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="metricBugs">0</div>
+            <div class="metric-label">Open bugs</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="metricFeatures">0</div>
+            <div class="metric-label">Open features</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="metricCritical">0</div>
+            <div class="metric-label">Critical open</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="metricProgress">0</div>
+            <div class="metric-label">In progress</div>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <section class="area-band" aria-label="Area counts">
+      <div class="area-inner">
+        <table class="area-table">
+          <thead>
+            <tr>
+              <th>Area</th>
+              <th>Open</th>
+              <th>Bugs</th>
+              <th>Features</th>
+              <th>Critical</th>
+              <th>In Progress</th>
+              <th>Area</th>
+              <th>Open</th>
+              <th>Bugs</th>
+              <th>Features</th>
+              <th>Critical</th>
+              <th>In Progress</th>
+            </tr>
+          </thead>
+          <tbody id="areaStats"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="filters" aria-label="Filters and grouping">
+      <div class="filters-inner">
+        <div class="field">
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="search" placeholder="Search description or id">
+        </div>
+        <div class="field">
+          <label for="typeFilter">Type</label>
+          <select id="typeFilter">
+            <option value="All">All</option>
+            <option value="Bug">Bug</option>
+            <option value="Feature">Feature</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="priorityFilter">Priority</label>
+          <select id="priorityFilter">
+            <option value="All">All</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ownerFilter">Owner</label>
+          <select id="ownerFilter">
+            <option value="All">All</option>
+            <option value="Fudge">Fudge</option>
+            <option value="Refay">Refay</option>
+            <option value="Duncan">Duncan</option>
+            <option value="Penman">Penman</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter">
+            <option value="Open">Open</option>
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="areaFilter">Area</label>
+          <select id="areaFilter">
+            <option value="All">All</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="groupBy">Group by</label>
+          <select id="groupBy">
+            <option value="priority">Priority</option>
+            <option value="owner">Owner</option>
+            <option value="type">Type</option>
+            <option value="status">Status</option>
+            <option value="area">Area</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sortBy">Sort by</label>
+          <select id="sortBy">
+            <option value="priority">Priority</option>
+            <option value="owner">Owner</option>
+            <option value="type">Type</option>
+            <option value="status">Status</option>
+            <option value="area">Area</option>
+          </select>
+        </div>
+        <button class="btn" type="button" id="clearBtn">Clear</button>
+      </div>
+    </section>
+
+    <main>
+      <div class="view-status">
+        <div id="viewSummary">Showing 0 items</div>
+        <div class="view-tabs" aria-label="Saved views">
+          <button class="tab active" type="button" data-view="open">All open</button>
+          <button class="tab" type="button" data-view="bugs">Bugs only</button>
+          <button class="tab" type="button" data-view="features">Features only</button>
+          <button class="tab" type="button" data-view="mine">My open items</button>
+        </div>
+      </div>
+      <section id="issueList" aria-label="Tracker items"></section>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="New tracker item" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <h2>New tracker item</h2>
+        <div class="subtitle">Classify, assign, and attach visual evidence</div>
+      </div>
+      <button class="icon-btn" type="button" id="closeDrawerBtn" aria-label="Close drawer">x</button>
+    </div>
+    <form id="newItemForm">
+      <div class="drawer-body">
+        <div class="field">
+          <label>Type</label>
+          <div class="segmented" role="group" aria-label="Type">
+            <button class="segment active" type="button" data-segment="Bug">Bug</button>
+            <button class="segment" type="button" data-segment="Feature">Feature</button>
+          </div>
+          <input type="hidden" id="newType" value="Bug">
+        </div>
+
+        <div class="field">
+          <div class="char-row">
+            <label for="newDescription">Description</label>
+            <span id="charCount">50 left</span>
+          </div>
+          <input id="newDescription" maxlength="50" required placeholder="Up to 50 characters">
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="newArea">Area</label>
+            <select id="newArea" required></select>
+          </div>
+          <div class="field">
+            <label for="newPriority">Priority</label>
+            <select id="newPriority" required>
+              <option>Critical</option>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="newOwner">Owner</label>
+            <select id="newOwner" required>
+              <option>Fudge</option>
+              <option>Refay</option>
+              <option>Duncan</option>
+              <option>Penman</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="newStatus">Status</label>
+            <select id="newStatus" required>
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pasteZone">Screenshot</label>
+          <div class="paste-zone" id="pasteZone" tabindex="0">
+            <div>
+              <strong>Paste screenshot here</strong><br>
+              Click this box, then paste from clipboard
+            </div>
+            <img class="paste-preview" id="pastePreview" alt="Pasted screenshot preview">
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn" type="button" id="cancelDrawerBtn">Cancel</button>
+        <button class="btn primary" type="submit">Save item</button>
+      </div>
+    </form>
+  </aside>
+
+  <script>
+    const areas = [
+      "Dashboard",
+      "Net Worth",
+      "Portfolio",
+      "Performance & Income",
+      "Financial",
+      "Property",
+      "Estate & Entities",
+      "Contacts",
+      "Taxes",
+      "Insurance",
+      "All Files",
+      "Profit & Loss",
+      "Balance Sheet",
+      "Cash Flow",
+      "Ledger",
+      "Analysis"
+    ];
+    const owners = ["Fudge", "Refay", "Duncan", "Penman"];
+    const priorities = ["Critical", "High", "Medium", "Low"];
+    const statuses = ["Pending", "In Progress"];
+    const seededDescriptions = [
+      "Payment confirm button hangs",
+      "Bulk property import needed",
+      "Balance total miscalculates",
+      "Dashboard search stale row",
+      "Net worth chart lags",
+      "Property photo crop jumps",
+      "Financial export drops cents",
+      "Owner filter clears on refresh",
+      "New audit timeline view",
+      "Pending badge color unclear",
+      "Screenshot preview clips modal",
+      "Resolved row should reopen"
+    ];
+
+    let issueCounter = 1000;
+    let selectedType = "Bug";
+    let pastedImage = "";
+
+    function areaPrefix(area) {
+      const words = area.match(/[A-Za-z]+/g) || ["Area"];
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return words.map((word) => word[0]).join("").slice(0, 3).toUpperCase();
+    }
+
+    function makeIssue(area, index, typeOverride) {
+      const type = typeOverride || (index % 14 === 0 ? "Feature" : "Bug");
+      const priority = priorities[(index + areas.indexOf(area)) % priorities.length];
+      const status = statuses[(index + owners.length) % statuses.length];
+      const owner = owners[(index + areas.indexOf(area)) % owners.length];
+      const description = seededDescriptions[(index + areas.indexOf(area)) % seededDescriptions.length];
+      const idPrefix = areaPrefix(area);
+      issueCounter += 1;
+      return {
+        id: `${idPrefix}-${issueCounter}`,
+        type,
+        description,
+        area,
+        priority,
+        owner,
+        status,
+        hasScreenshot: index % 3 === 0 || priority === "Critical",
+        logCount: 1 + (index % 4),
+        updated: `${1 + (index % 9)}h ago`,
+        note: type === "Bug" ? "Needs reproduction and owner check" : "Candidate for grooming",
+        createdBy: owners[(index + 1) % owners.length]
+      };
+    }
+
+    function buildSeedData() {
+      const items = [];
+      areas.forEach((area) => {
+        for (let i = 0; i < 10; i += 1) {
+          items.push(makeIssue(area, i, "Bug"));
+        }
+        for (let i = 0; i < 2; i += 1) {
+          items.push(makeIssue(area, i + 10, "Feature"));
+        }
+      });
+      for (let i = 0; i < areas.length; i += 1) {
+        const issue = makeIssue(areas[i], i + 24, i % 2 ? "Bug" : "Feature");
+        issue.status = "Resolved";
+        issue.priority = priorities[(i + 1) % priorities.length];
+        items.push(issue);
+      }
+      items[0].description = "Payment confirm button hangs";
+      items[0].priority = "Critical";
+      items[0].owner = "Fudge";
+      items[0].status = "Pending";
+      items[0].hasScreenshot = true;
+      items[1].description = "Login loop after timeout";
+      items[1].priority = "Critical";
+      items[1].owner = "Refay";
+      items[1].status = "In Progress";
+      items[1].hasScreenshot = true;
+      const financialIssue = items.find((issue) => issue.area === "Financial" && issue.type === "Bug");
+      financialIssue.description = "Receipt export missing tax";
+      financialIssue.priority = "High";
+      financialIssue.owner = "Duncan";
+      const balanceIssue = items.find((issue) => issue.area === "Balance Sheet" && issue.type === "Bug");
+      balanceIssue.description = "Balance total miscalculates";
+      balanceIssue.priority = "Critical";
+      balanceIssue.owner = "Refay";
+      const propertyFeature = items.find((issue) => issue.area === "Property" && issue.type === "Feature");
+      propertyFeature.description = "Bulk property import needed";
+      propertyFeature.priority = "High";
+      propertyFeature.owner = "Penman";
+      return items;
+    }
+
+    let issues = buildSeedData();
+
+    const dom = {
+      metricOpen: document.getElementById("metricOpen"),
+      metricBugs: document.getElementById("metricBugs"),
+      metricFeatures: document.getElementById("metricFeatures"),
+      metricCritical: document.getElementById("metricCritical"),
+      metricProgress: document.getElementById("metricProgress"),
+      areaStats: document.getElementById("areaStats"),
+      issueList: document.getElementById("issueList"),
+      viewSummary: document.getElementById("viewSummary"),
+      searchInput: document.getElementById("searchInput"),
+      typeFilter: document.getElementById("typeFilter"),
+      priorityFilter: document.getElementById("priorityFilter"),
+      ownerFilter: document.getElementById("ownerFilter"),
+      statusFilter: document.getElementById("statusFilter"),
+      areaFilter: document.getElementById("areaFilter"),
+      groupBy: document.getElementById("groupBy"),
+      sortBy: document.getElementById("sortBy"),
+      clearBtn: document.getElementById("clearBtn"),
+      drawer: document.getElementById("drawer"),
+      drawerBackdrop: document.getElementById("drawerBackdrop"),
+      openDrawerBtn: document.getElementById("openDrawerBtn"),
+      closeDrawerBtn: document.getElementById("closeDrawerBtn"),
+      cancelDrawerBtn: document.getElementById("cancelDrawerBtn"),
+      form: document.getElementById("newItemForm"),
+      newDescription: document.getElementById("newDescription"),
+      charCount: document.getElementById("charCount"),
+      pasteZone: document.getElementById("pasteZone"),
+      pastePreview: document.getElementById("pastePreview"),
+      exportBtn: document.getElementById("exportBtn"),
+      resolvedViewBtn: document.getElementById("resolvedViewBtn")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function populateAreaSelects() {
+      const areaOptions = areas
+        .map((area) => `<option value="${escapeHtml(area)}">${escapeHtml(area)}</option>`)
+        .join("");
+      dom.areaFilter.innerHTML = `<option value="All">All</option>${areaOptions}`;
+      dom.newArea.innerHTML = areaOptions;
+    }
+
+    function isOpen(issue) {
+      return issue.status !== "Resolved";
+    }
+
+    function priorityClass(priority) {
+      return priority.toLowerCase();
+    }
+
+    function statusClass(status) {
+      return status.toLowerCase().replace(/\s+/g, "-");
+    }
+
+    function ownerInitials(owner) {
+      return owner.slice(0, 2).toUpperCase();
+    }
+
+    function optionOrder(groupBy) {
+      if (groupBy === "priority") return priorities;
+      if (groupBy === "owner") return owners;
+      if (groupBy === "type") return ["Bug", "Feature"];
+      if (groupBy === "status") return ["Pending", "In Progress", "Resolved"];
+      return areas;
+    }
+
+    function getFilters() {
+      return {
+        search: dom.searchInput.value.trim().toLowerCase(),
+        type: dom.typeFilter.value,
+        priority: dom.priorityFilter.value,
+        owner: dom.ownerFilter.value,
+        status: dom.statusFilter.value,
+        area: dom.areaFilter.value,
+        groupBy: dom.groupBy.value,
+        sortBy: dom.sortBy.value
+      };
+    }
+
+    function applyFilters(items) {
+      const filters = getFilters();
+      return items.filter((issue) => {
+        const matchesSearch = !filters.search ||
+          issue.description.toLowerCase().includes(filters.search) ||
+          issue.id.toLowerCase().includes(filters.search);
+        const matchesType = filters.type === "All" || issue.type === filters.type;
+        const matchesPriority = filters.priority === "All" || issue.priority === filters.priority;
+        const matchesOwner = filters.owner === "All" || issue.owner === filters.owner;
+        const matchesArea = filters.area === "All" || issue.area === filters.area;
+        const matchesStatus = filters.status === "All" ||
+          (filters.status === "Open" ? isOpen(issue) : issue.status === filters.status);
+        return matchesSearch && matchesType && matchesPriority && matchesOwner && matchesArea && matchesStatus;
+      });
+    }
+
+    function sortValue(issue, field) {
+      if (field === "priority") return priorities.indexOf(issue.priority);
+      if (field === "owner") return owners.indexOf(issue.owner);
+      if (field === "type") return ["Bug", "Feature"].indexOf(issue.type);
+      if (field === "status") return ["Pending", "In Progress", "Resolved"].indexOf(issue.status);
+      if (field === "area") return areas.indexOf(issue.area);
+      return 0;
+    }
+
+    function sortIssues(items) {
+      const filters = getFilters();
+      return [...items].sort((a, b) => {
+        const primaryDiff = sortValue(a, filters.sortBy) - sortValue(b, filters.sortBy);
+        if (primaryDiff !== 0) return primaryDiff;
+        const priorityDiff = sortValue(a, "priority") - sortValue(b, "priority");
+        if (priorityDiff !== 0 && filters.sortBy !== "priority") return priorityDiff;
+        if (a.status !== b.status) return a.status.localeCompare(b.status);
+        return a.id.localeCompare(b.id);
+      });
+    }
+
+    function updateMetrics() {
+      const open = issues.filter(isOpen);
+      dom.metricOpen.textContent = open.length;
+      dom.metricBugs.textContent = open.filter((issue) => issue.type === "Bug").length;
+      dom.metricFeatures.textContent = open.filter((issue) => issue.type === "Feature").length;
+      dom.metricCritical.textContent = open.filter((issue) => issue.priority === "Critical").length;
+      dom.metricProgress.textContent = open.filter((issue) => issue.status === "In Progress").length;
+
+      const cellsForArea = (area) => {
+        const areaOpen = open.filter((issue) => issue.area === area);
+        return `
+            <td><strong>${escapeHtml(area)}</strong></td>
+            <td>${areaOpen.length}</td>
+            <td>${areaOpen.filter((issue) => issue.type === "Bug").length}</td>
+            <td>${areaOpen.filter((issue) => issue.type === "Feature").length}</td>
+            <td>${areaOpen.filter((issue) => issue.priority === "Critical").length}</td>
+            <td>${areaOpen.filter((issue) => issue.status === "In Progress").length}</td>
+        `;
+      };
+
+      const rows = [];
+      for (let i = 0; i < areas.length; i += 2) {
+        rows.push(`
+          <tr>
+            ${cellsForArea(areas[i])}
+            ${areas[i + 1] ? cellsForArea(areas[i + 1]) : "<td></td><td></td><td></td><td></td><td></td><td></td>"}
+          </tr>
+        `);
+      }
+      dom.areaStats.innerHTML = rows.join("");
+    }
+
+    function detailTemplate(issue) {
+      const screenshot = issue.hasScreenshot ? `
+        <div class="screenshot-frame" aria-label="Screenshot preview for ${issue.id}">
+          <div class="fake-browser-bar">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <div class="fake-screen">
+            <div class="screen-panel">
+              <div class="screen-line short"></div>
+              <div class="screen-line"></div>
+              <div class="screen-line warn"></div>
+              <div class="screen-button"></div>
+            </div>
+            <div class="screen-panel">
+              <div class="screen-line"></div>
+              <div class="screen-line short"></div>
+              <div class="screen-line"></div>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <div class="screenshot-frame" aria-label="No screenshot attached">
+          <div class="fake-browser-bar">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <div class="fake-screen">
+            <div class="screen-panel">
+              <strong>No screenshot attached</strong>
+              <div class="screen-line short"></div>
+              <div class="screen-line"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      return `
+        <div class="details" id="details-${issue.id}">
+          ${screenshot}
+          <div class="log-panel">
+            <div class="log-title">Activity log</div>
+            <div class="log-list">
+              <div class="log-item"><span>${issue.updated}</span><strong>${issue.owner} moved item to ${issue.status}</strong></div>
+              <div class="log-item"><span>1d ago</span><strong>${issue.createdBy} set priority to ${issue.priority}</strong></div>
+              <div class="log-item"><span>2d ago</span><strong>${issue.createdBy} created ${issue.type.toLowerCase()} in ${issue.area}</strong></div>
+              ${issue.hasScreenshot ? `<div class="log-item"><span>2d ago</span><strong>Screenshot evidence attached</strong></div>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function rowTemplate(issue) {
+      return `
+        <article class="issue-row" data-id="${issue.id}">
+          <div class="issue-main">
+            <div class="issue-title">
+              <span class="badge ${issue.type.toLowerCase()}">${issue.type}</span>
+              <strong title="${issue.description}">${issue.description}</strong>
+            </div>
+            <div class="issue-subline">
+              <span class="issue-id">${issue.id}</span>
+              <span class="small-note">${issue.note}</span>
+            </div>
+          </div>
+          <div class="cell">
+            <span class="cell-label">Area</span>
+            <strong>${issue.area}</strong>
+          </div>
+          <div class="cell">
+            <span class="cell-label">Owner</span>
+            <span class="owner"><span class="avatar">${ownerInitials(issue.owner)}</span>${issue.owner}</span>
+          </div>
+          <div class="cell">
+            <span class="cell-label">Priority</span>
+            <span class="pill ${priorityClass(issue.priority)}">${issue.priority}</span>
+          </div>
+          <div class="cell">
+            <span class="cell-label">Status</span>
+            <span class="pill ${statusClass(issue.status)}">${issue.status}</span>
+          </div>
+          <div class="evidence">
+            <strong>${issue.hasScreenshot ? "Screenshot" : "No image"}</strong>
+            <span>${issue.logCount} log ${issue.logCount === 1 ? "entry" : "entries"}</span>
+          </div>
+          <button class="expand-btn" type="button" aria-label="Expand screenshot and log for ${issue.id}" aria-expanded="false" data-expand="${issue.id}">+</button>
+        </article>
+        ${detailTemplate(issue)}
+      `;
+    }
+
+    function renderIssues() {
+      updateMetrics();
+      const filters = getFilters();
+      const filtered = sortIssues(applyFilters(issues));
+      dom.viewSummary.textContent = `Showing ${filtered.length} item${filtered.length === 1 ? "" : "s"} grouped by ${filters.groupBy}`;
+
+      if (!filtered.length) {
+        dom.issueList.innerHTML = `<div class="empty">No items match the current filters.</div>`;
+        return;
+      }
+
+      const groups = new Map();
+      filtered.forEach((issue) => {
+        const key = issue[filters.groupBy];
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(issue);
+      });
+
+      const orderedKeys = optionOrder(filters.groupBy).filter((key) => groups.has(key));
+      dom.issueList.innerHTML = orderedKeys.map((key) => {
+        const groupIssues = groups.get(key);
+        const openCount = groupIssues.filter(isOpen).length;
+        return `
+          <section class="group">
+            <header class="group-header">
+              <div class="group-title">
+                <span>${key}</span>
+                <span class="count-pill">${groupIssues.length}</span>
+              </div>
+              <div class="group-actions">${openCount} open</div>
+            </header>
+            <div class="rows">${groupIssues.map(rowTemplate).join("")}</div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function openDrawer() {
+      dom.drawer.classList.add("open");
+      dom.drawerBackdrop.classList.add("open");
+      dom.drawer.setAttribute("aria-hidden", "false");
+      dom.newDescription.focus();
+    }
+
+    function closeDrawer() {
+      dom.drawer.classList.remove("open");
+      dom.drawerBackdrop.classList.remove("open");
+      dom.drawer.setAttribute("aria-hidden", "true");
+    }
+
+    function resetForm() {
+      dom.form.reset();
+      selectedType = "Bug";
+      document.getElementById("newType").value = selectedType;
+      document.querySelectorAll(".segment").forEach((button) => {
+        button.classList.toggle("active", button.dataset.segment === selectedType);
+      });
+      dom.newDescription.value = "";
+      dom.charCount.textContent = "50 left";
+      pastedImage = "";
+      dom.pastePreview.removeAttribute("src");
+      dom.pastePreview.classList.remove("visible");
+      dom.pasteZone.querySelector("div").style.display = "block";
+    }
+
+    document.addEventListener("click", (event) => {
+      const expand = event.target.closest("[data-expand]");
+      if (!expand) return;
+      const id = expand.dataset.expand;
+      const details = document.getElementById(`details-${id}`);
+      const isOpenNow = details.classList.toggle("open");
+      expand.textContent = isOpenNow ? "-" : "+";
+      expand.setAttribute("aria-expanded", String(isOpenNow));
+    });
+
+    [
+      dom.searchInput,
+      dom.typeFilter,
+      dom.priorityFilter,
+      dom.ownerFilter,
+      dom.statusFilter,
+      dom.areaFilter,
+      dom.groupBy,
+      dom.sortBy
+    ].forEach((control) => control.addEventListener("input", renderIssues));
+
+    dom.clearBtn.addEventListener("click", () => {
+      dom.searchInput.value = "";
+      dom.typeFilter.value = "All";
+      dom.priorityFilter.value = "All";
+      dom.ownerFilter.value = "All";
+      dom.statusFilter.value = "Open";
+      dom.areaFilter.value = "All";
+      dom.groupBy.value = "priority";
+      dom.sortBy.value = "priority";
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "open"));
+      renderIssues();
+    });
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((item) => item.classList.remove("active"));
+        tab.classList.add("active");
+        dom.statusFilter.value = "Open";
+        dom.typeFilter.value = "All";
+        dom.ownerFilter.value = "All";
+        if (tab.dataset.view === "bugs") dom.typeFilter.value = "Bug";
+        if (tab.dataset.view === "features") dom.typeFilter.value = "Feature";
+        if (tab.dataset.view === "mine") dom.ownerFilter.value = "Fudge";
+        renderIssues();
+      });
+    });
+
+    dom.openDrawerBtn.addEventListener("click", openDrawer);
+    dom.closeDrawerBtn.addEventListener("click", closeDrawer);
+    dom.cancelDrawerBtn.addEventListener("click", closeDrawer);
+    dom.drawerBackdrop.addEventListener("click", closeDrawer);
+
+    dom.resolvedViewBtn.addEventListener("click", () => {
+      dom.statusFilter.value = "Resolved";
+      renderIssues();
+    });
+
+    dom.exportBtn.addEventListener("click", () => {
+      const filtered = applyFilters(issues);
+      const text = filtered.map((issue) => `${issue.id},${issue.type},${issue.priority},${issue.owner},${issue.status},${issue.description}`).join("\n");
+      navigator.clipboard?.writeText(text);
+      dom.exportBtn.textContent = "Copied";
+      window.setTimeout(() => {
+        dom.exportBtn.textContent = "Export";
+      }, 1200);
+    });
+
+    document.querySelectorAll(".segment").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedType = button.dataset.segment;
+        document.getElementById("newType").value = selectedType;
+        document.querySelectorAll(".segment").forEach((item) => item.classList.toggle("active", item === button));
+      });
+    });
+
+    dom.newDescription.addEventListener("input", () => {
+      const remaining = 50 - dom.newDescription.value.length;
+      dom.charCount.textContent = `${remaining} left`;
+    });
+
+    dom.pasteZone.addEventListener("paste", (event) => {
+      const items = event.clipboardData?.items || [];
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = () => {
+            pastedImage = reader.result;
+            dom.pastePreview.src = pastedImage;
+            dom.pastePreview.classList.add("visible");
+            dom.pasteZone.querySelector("div").style.display = "none";
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    });
+
+    dom.form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const area = document.getElementById("newArea").value;
+      const idPrefix = areaPrefix(area);
+      issueCounter += 1;
+      issues.unshift({
+        id: `${idPrefix}-${issueCounter}`,
+        type: selectedType,
+        description: dom.newDescription.value,
+        area,
+        priority: document.getElementById("newPriority").value,
+        owner: document.getElementById("newOwner").value,
+        status: document.getElementById("newStatus").value,
+        hasScreenshot: Boolean(pastedImage),
+        logCount: pastedImage ? 2 : 1,
+        updated: "just now",
+        note: selectedType === "Bug" ? "Newly submitted for triage" : "New feature request",
+        createdBy: document.getElementById("newOwner").value
+      });
+      resetForm();
+      closeDrawer();
+      renderIssues();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && dom.drawer.classList.contains("open")) {
+        closeDrawer();
+      }
+    });
+
+    populateAreaSelects();
+    renderIssues();
+  </script>
+</body>
+</html>
